@@ -30,7 +30,7 @@
   "dependencies": {
     "@tryghost/domain-events": "0.0.0",
     "@tryghost/errors": "1.2.18",
-    "@tryghost/logging": "2.3.2",
+    "@tryghost/logging": "2.3.4",
     "@tryghost/magic-link": "0.0.0",
     "@tryghost/member-events": "0.0.0",
     "@tryghost/members-payments": "0.0.0",
