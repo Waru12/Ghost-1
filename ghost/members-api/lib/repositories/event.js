@@ -27,6 +27,7 @@ module.exports = class EventRepository {
         MemberPaidSubscriptionEvent,
         MemberLinkClickEvent,
         MemberFeedback,
+        EmailSpamComplaintEvent,
         Comment,
         labsService,
         memberAttributionService
@@ -43,6 +44,7 @@ module.exports = class EventRepository {
         this._SubscriptionCreatedEvent = SubscriptionCreatedEvent;
         this._MemberLinkClickEvent = MemberLinkClickEvent;
         this._MemberFeedback = MemberFeedback;
+        this._EmailSpamComplaintEvent = EmailSpamComplaintEvent;
         this._memberAttributionService = memberAttributionService;
     }
 
@@ -80,6 +82,7 @@ module.exports = class EventRepository {
             pageActions.push({type: 'email_delivered_event', action: 'getEmailDeliveredEvents'});
             pageActions.push({type: 'email_opened_event', action: 'getEmailOpenedEvents'});
             pageActions.push({type: 'email_failed_event', action: 'getEmailFailedEvents'});
+            pageActions.push({type: 'email_complained_event', action: 'getEmailSpamComplaintEvents'});
         }
 
         if (this._labsService.isSet('audienceFeedback')) {
@@ -625,6 +628,40 @@ module.exports = class EventRepository {
             data,
             meta
         };
+    }
+
+    async getEmailSpamComplaintEvents(options = {}, filter) {
+        options = {
+            ...options,
+            withRelated: ['member', 'email'],
+            filter: 'custom:true',
+            mongoTransformer: chainTransformers(
+                // First set the filter manually
+                replaceCustomFilterTransformer(filter),
+
+                // Map the used keys in that filter
+                ...mapKeys({
+                    'data.created_at': 'created_at',
+                    'data.member_id': 'member_id',
+                    'data.post_id': 'email.post_id'
+                })
+            )
+        };
+
+        const {data: models, meta} = await this._EmailSpamComplaintEvent.findPage(options);
+
+        const data = models.map((model) => {
+            return {
+                type: 'email_complaint_event',
+                data: model.toJSON(options)
+            };
+        });
+
+        return {
+            data,
+            meta
+        };
+
     }
 
     async getEmailFailedEvents(options = {}, filter) {
