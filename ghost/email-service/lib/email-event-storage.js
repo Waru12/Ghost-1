@@ -4,12 +4,17 @@ const moment = require('moment-timezone');
 class EmailEventStorage {
     #db;
     #membersRepository;
+    #EmailSpamComplaintEvent;
 
-    constructor({db, membersRepository}) {
+    constructor({db, membersRepository, EmailSpamComplaintEvent}) {
         this.#db = db;
         this.#membersRepository = membersRepository;
+        this.#EmailSpamComplaintEvent = EmailSpamComplaintEvent;
     }
 
+    /**
+     * @param {import('@tryghost/domain-events')} domainEvents
+     */
     listen(domainEvents) {
         domainEvents.subscribe(EmailDeliveredEvent, async (event) => {
             await this.handleDelivered(event);
@@ -61,7 +66,11 @@ class EmailEventStorage {
     }
 
     async handleComplained(event) {
-        return this.unsubscribeFromNewsletters(event);
+        await this.#EmailSpamComplaintEvent.add({
+            member_id: event.memberId,
+            email_id: event.emailId,
+            email_address: event.email
+        });
     }
 
     async unsubscribeFromNewsletters(event) {
