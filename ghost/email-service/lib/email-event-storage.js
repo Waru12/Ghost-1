@@ -1,3 +1,4 @@
+const logging = require('@tryghost/logging');
 const {EmailDeliveredEvent, EmailOpenedEvent, EmailBouncedEvent, EmailUnsubscribedEvent, SpamComplaintEvent} = require('@tryghost/email-events');
 const moment = require('moment-timezone');
 
@@ -66,11 +67,17 @@ class EmailEventStorage {
     }
 
     async handleComplained(event) {
-        await this.#EmailSpamComplaintEvent.add({
-            member_id: event.memberId,
-            email_id: event.emailId,
-            email_address: event.email
-        });
+        try {
+            await this.#EmailSpamComplaintEvent.add({
+                member_id: event.memberId,
+                email_id: event.emailId,
+                email_address: event.email
+            });
+        } catch (err) {
+            if (err.code !== 'ER_DUP_ENTRY' && err.code !== 'SQLITE_CONSTRAINT') {
+                logging.error(err);
+            }
+        }
     }
 
     async unsubscribeFromNewsletters(event) {
