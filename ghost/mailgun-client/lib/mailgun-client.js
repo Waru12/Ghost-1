@@ -181,7 +181,6 @@ module.exports = class MailgunClient {
                 type,
                 email
             );
-            console.log(result);
             return true;
         } catch (err) {
             logging.error(err);
