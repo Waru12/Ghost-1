@@ -3,6 +3,12 @@ module.exports = class EmailBouncedEvent {
      * @readonly
      * @type {string}
      */
+    id;
+    
+    /**
+     * @readonly
+     * @type {string}
+     */
     email;
 
     /**
@@ -19,6 +25,12 @@ module.exports = class EmailBouncedEvent {
 
     /**
      * @readonly
+     * @type {{message: string, code: number, enhancedCode: string | null}}
+     */
+    error;
+
+    /**
+     * @readonly
      * @type {string}
      */
     emailRecipientId;
@@ -32,10 +44,12 @@ module.exports = class EmailBouncedEvent {
     /**
      * @private
      */
-    constructor({email, memberId, emailId, emailRecipientId, timestamp}) {
+    constructor({id, email, memberId, emailId, error, emailRecipientId, timestamp}) {
+        this.id = id;
         this.memberId = memberId;
         this.emailId = emailId;
         this.email = email;
+        this.error = error;
         this.emailRecipientId = emailRecipientId;
         this.timestamp = timestamp;
     }
